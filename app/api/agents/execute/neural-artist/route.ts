@@ -1,5 +1,6 @@
 import Replicate from 'replicate';
 import { NextRequest } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 const getReplicateClient = () => {
   if (!process.env.REPLICATE_API_TOKEN) {
@@ -11,17 +12,31 @@ const getReplicateClient = () => {
 };
 
 export async function POST(request: NextRequest) {
-  try {
-    const { prompt, style, transaction_id } = await request.json();
+  const { prompt, style, transaction_id } = await request.json();
 
+  try {
     if (!prompt) {
-      return Response.json({ error: 'Prompt is required' }, { status: 400 });
+      const errorMsg = 'Prompt is required';
+      if (transaction_id) {
+        await supabase
+          .from('transactions')
+          .update({ error_message: errorMsg })
+          .eq('id', transaction_id);
+      }
+      return Response.json({ error: errorMsg }, { status: 400 });
     }
 
     const replicate = getReplicateClient();
     if (!replicate) {
+      const errorMsg = 'Replicate API token not configured';
+      if (transaction_id) {
+        await supabase
+          .from('transactions')
+          .update({ error_message: errorMsg })
+          .eq('id', transaction_id);
+      }
       return Response.json({
-        error: 'Replicate API token not configured',
+        error: errorMsg,
         details: 'Please set REPLICATE_API_TOKEN environment variable'
       }, { status: 500 });
     }
@@ -36,13 +51,35 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    return Response.json({
+    const outputData = {
       success: true,
       image_url: output,
+    };
+
+    // Update transaction with output_data
+    if (transaction_id) {
+      await supabase
+        .from('transactions')
+        .update({ output_data: outputData })
+        .eq('id', transaction_id);
+    }
+
+    return Response.json({
+      ...outputData,
       transaction_id
     });
   } catch (error: any) {
     console.error('Neural Artist error:', error);
+    const errorMsg = 'Failed to generate image: ' + error.message;
+
+    // Update transaction with error_message
+    if (transaction_id) {
+      await supabase
+        .from('transactions')
+        .update({ error_message: errorMsg })
+        .eq('id', transaction_id);
+    }
+
     return Response.json({
       error: 'Failed to generate image',
       details: error.message

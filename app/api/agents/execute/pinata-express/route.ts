@@ -1,16 +1,31 @@
 import { NextRequest } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
-  try {
-    const { file_url, transaction_id } = await request.json();
+  const { file_url, transaction_id } = await request.json();
 
+  try {
     if (!file_url) {
-      return Response.json({ error: 'File URL is required' }, { status: 400 });
+      const errorMsg = 'File URL is required';
+      if (transaction_id) {
+        await supabase
+          .from('transactions')
+          .update({ error_message: errorMsg })
+          .eq('id', transaction_id);
+      }
+      return Response.json({ error: errorMsg }, { status: 400 });
     }
 
     const fileResponse = await fetch(file_url);
     if (!fileResponse.ok) {
-      return Response.json({ error: 'Failed to fetch file' }, { status: 400 });
+      const errorMsg = 'Failed to fetch file';
+      if (transaction_id) {
+        await supabase
+          .from('transactions')
+          .update({ error_message: errorMsg })
+          .eq('id', transaction_id);
+      }
+      return Response.json({ error: errorMsg }, { status: 400 });
     }
 
     const fileBlob = await fileResponse.blob();
@@ -28,22 +43,51 @@ export async function POST(request: NextRequest) {
 
     if (!pinataResponse.ok) {
       const errorData = await pinataResponse.json();
+      const errorMsg = 'Failed to upload to IPFS';
+      if (transaction_id) {
+        await supabase
+          .from('transactions')
+          .update({ error_message: errorMsg })
+          .eq('id', transaction_id);
+      }
       return Response.json({
-        error: 'Failed to upload to IPFS',
+        error: errorMsg,
         details: errorData
       }, { status: 500 });
     }
 
     const { IpfsHash } = await pinataResponse.json();
 
-    return Response.json({
+    const outputData = {
       success: true,
       ipfs_hash: IpfsHash,
       gateway_url: `https://gateway.pinata.cloud/ipfs/${IpfsHash}`,
+    };
+
+    // Update transaction with output_data
+    if (transaction_id) {
+      await supabase
+        .from('transactions')
+        .update({ output_data: outputData })
+        .eq('id', transaction_id);
+    }
+
+    return Response.json({
+      ...outputData,
       transaction_id
     });
   } catch (error: any) {
     console.error('Pinata Express error:', error);
+    const errorMsg = 'Failed to upload to IPFS: ' + error.message;
+
+    // Update transaction with error_message
+    if (transaction_id) {
+      await supabase
+        .from('transactions')
+        .update({ error_message: errorMsg })
+        .eq('id', transaction_id);
+    }
+
     return Response.json({
       error: 'Failed to upload to IPFS',
       details: error.message

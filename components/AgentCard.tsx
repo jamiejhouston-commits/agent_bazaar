@@ -41,7 +41,14 @@ export function AgentCard({ agent }: AgentCardProps) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-lg mb-1 truncate">{agent.name}</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-lg truncate">{agent.name}</h3>
+              {agent.name.toLowerCase().includes('collection curator') && (
+                <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  Demo
+                </Badge>
+              )}
+            </div>
             <Badge className={getCategoryColor(agent.category)}>
               {agent.category}
             </Badge>

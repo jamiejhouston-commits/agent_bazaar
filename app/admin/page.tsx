@@ -6,9 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, TrendingUp, Users } from 'lucide-react';
-
-const ADMIN_EMAILS = ['admin@example.com'];
+import { DollarSign, TrendingUp, Users, AlertCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -20,6 +19,8 @@ export default function AdminDashboard() {
   });
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
 
   useEffect(() => {
     if (!user) {
@@ -27,14 +28,35 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (!ADMIN_EMAILS.includes(user.email || '')) {
-      router.push('/');
-      return;
-    }
-
-    fetchStats();
-    fetchTransactions();
+    checkAdminStatus();
   }, [user, router]);
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(!!data);
+      }
+
+      if (data) {
+        fetchStats();
+        fetchTransactions();
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    } finally {
+      setCheckingAdmin(false);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -58,7 +80,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) {
+  if (checkingAdmin || loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Skeleton className="h-12 w-64 mb-8" />
@@ -68,6 +90,30 @@ export default function AdminDashboard() {
           <Skeleton className="h-32" />
         </div>
         <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="border-red-200 dark:border-red-800 max-w-md mx-auto">
+          <CardContent className="py-12 text-center">
+            <div className="h-16 w-16 mx-auto rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center mb-4">
+              <AlertCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Access Denied</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              You don't have permission to access the admin dashboard.
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              className="text-sm text-purple-600 hover:text-purple-700"
+            >
+              Return to Home
+            </button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

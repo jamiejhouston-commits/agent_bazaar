@@ -1,15 +1,24 @@
 import { Client, Wallet, xrpToDrops } from 'xrpl';
 import { NextRequest } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
-  try {
-    const { metadata_uri, recipient_address, transaction_id } = await request.json();
+  const { metadata_uri, recipient_address, transaction_id } = await request.json();
+  let client: Client | null = null;
 
+  try {
     if (!metadata_uri) {
-      return Response.json({ error: 'Metadata URI is required' }, { status: 400 });
+      const errorMsg = 'Metadata URI is required';
+      if (transaction_id) {
+        await supabase
+          .from('transactions')
+          .update({ error_message: errorMsg })
+          .eq('id', transaction_id);
+      }
+      return Response.json({ error: errorMsg }, { status: 400 });
     }
 
-    const client = new Client(process.env.XRPL_NETWORK || 'wss://xrplcluster.com');
+    client = new Client(process.env.XRPL_NETWORK || 'wss://xrplcluster.com');
     await client.connect();
 
     const wallet = Wallet.fromSeed(process.env.XRPL_ADMIN_SEED!);
@@ -37,14 +46,45 @@ export async function POST(request: NextRequest) {
 
     await client.disconnect();
 
-    return Response.json({
+    const outputData = {
       success: true,
-      nftoken_id: nftokenID,
+      nft_token_id: nftokenID,
+      tx_hash: response.result.hash,
       explorer_url: `https://livenet.xrpl.org/transactions/${response.result.hash}`,
+    };
+
+    // Update transaction with output_data
+    if (transaction_id) {
+      await supabase
+        .from('transactions')
+        .update({ output_data: outputData })
+        .eq('id', transaction_id);
+    }
+
+    return Response.json({
+      ...outputData,
       transaction_id
     });
   } catch (error: any) {
     console.error('XRPL Minter error:', error);
+    const errorMsg = 'Failed to mint NFT on XRPL: ' + error.message;
+
+    if (client) {
+      try {
+        await client.disconnect();
+      } catch (e) {
+        console.error('Failed to disconnect XRPL client:', e);
+      }
+    }
+
+    // Update transaction with error_message
+    if (transaction_id) {
+      await supabase
+        .from('transactions')
+        .update({ error_message: errorMsg })
+        .eq('id', transaction_id);
+    }
+
     return Response.json({
       error: 'Failed to mint NFT on XRPL',
       details: error.message

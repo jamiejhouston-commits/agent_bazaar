@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { agent_id, amount, user_id } = body;
+    const { agent_id, amount, user_id, blockchain_tx_hash } = body;
 
     if (!agent_id || !amount) {
       return NextResponse.json(
@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
           timestamp: new Date().toISOString(),
           protocol: 'AP2',
           settlement: 'instant',
+          blockchain_tx_hash: blockchain_tx_hash || null,
+          network: 'Polygon',
         },
       })
       .select()
