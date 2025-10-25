@@ -44,6 +44,11 @@ export default function AgentsPage() {
   };
 
   const applyFilters = () => {
+    if (!agents || agents.length === 0) {
+      setFilteredAgents([]);
+      return;
+    }
+
     let filtered = [...agents];
 
     if (searchQuery) {
