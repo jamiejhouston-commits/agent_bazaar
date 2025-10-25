@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle2, Loader2, Shield, ExternalLink } from 'lucide-react';
+import { CircleCheck as CheckCircle2, Loader as Loader2, Shield, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface PaymentModalProps {
