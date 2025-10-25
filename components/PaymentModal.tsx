@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Agent } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -117,16 +117,6 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
     }
   };
 
-  // Watch for transaction confirmation
-  if (isConfirming && state !== 'confirming') {
-    setState('confirming');
-  }
-
-  // Handle successful blockchain confirmation
-  if (isConfirmed && hash && state === 'confirming') {
-    handleBlockchainSuccess(hash);
-  }
-
   const handleBlockchainSuccess = async (txHash: `0x${string}`) => {
     try {
       setBlockchainTxHash(txHash);
@@ -220,6 +210,20 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
     setBlockchainTxHash('');
     onOpenChange(false);
   };
+
+  // Watch for transaction confirmation
+  useEffect(() => {
+    if (isConfirming && state !== 'confirming') {
+      setState('confirming');
+    }
+  }, [isConfirming, state]);
+
+  // Handle successful blockchain confirmation
+  useEffect(() => {
+    if (isConfirmed && hash && state === 'confirming') {
+      handleBlockchainSuccess(hash);
+    }
+  }, [isConfirmed, hash, state]);
 
   return (
     <Dialog open={open} onOpenChange={resetAndClose}>
