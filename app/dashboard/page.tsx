@@ -186,10 +186,12 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>My Agents</CardTitle>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Agent
-              </Button>
+              <Link href="/agents/new">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Agent
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-gray-500">
