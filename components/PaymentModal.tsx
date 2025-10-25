@@ -65,14 +65,38 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
 
       if (response.ok && data.transaction) {
         setTransactionId(data.transaction.id);
+
+        const agentSlug = agent.name.toLowerCase().replace(/\s+/g, '-');
+        const executeResponse = await fetch(`/api/agents/execute/${agentSlug}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            transaction_id: data.transaction.id,
+            prompt: 'a beautiful sunset over mountains',
+            nft_name: 'My NFT',
+            collection_type: 'Digital Art',
+            file_url: 'https://via.placeholder.com/500',
+            metadata_uri: 'ipfs://example',
+            wallet_address: user.id,
+          }),
+        });
+
+        const executeResult = await executeResponse.json();
+
         setState('success');
         toast({
           title: 'Payment successful!',
-          description: 'Your agent is now executing',
+          description: 'Your agent has executed successfully',
         });
         if (onSuccess) {
           onSuccess(data.transaction.id);
         }
+
+        setTimeout(() => {
+          router.push(`/transactions/${data.transaction.id}`);
+        }, 2000);
       } else {
         setState('error');
         toast({
