@@ -77,9 +77,14 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="hover:bg-gray-100 dark:hover:bg-gray-800"
+                onClick={() => {
+                  const newTheme = theme === 'dark' ? 'light' : 'dark';
+                  setTheme(newTheme);
+                  console.log('Theme switched to:', newTheme);
+                }}
+                className="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                 aria-label="Toggle theme"
+                type="button"
               >
                 {theme === 'dark' ? (
                   <Sun className="h-5 w-5 text-gray-700 dark:text-yellow-400" />
