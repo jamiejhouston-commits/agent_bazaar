@@ -34,10 +34,17 @@ export default function AgentsPage() {
   const fetchAgents = async () => {
     try {
       const response = await fetch('/api/agents');
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('API error:', error);
+        setAgents([]);
+        return;
+      }
       const data = await response.json();
-      setAgents(data);
+      setAgents(data || []);
     } catch (error) {
       console.error('Failed to fetch agents:', error);
+      setAgents([]);
     } finally {
       setLoading(false);
     }

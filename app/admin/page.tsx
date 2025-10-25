@@ -61,6 +61,11 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       const res = await fetch('/api/admin/stats');
+      if (!res.ok) {
+        const error = await res.json();
+        console.error('API error:', error);
+        return;
+      }
       const data = await res.json();
       setStats(data);
     } catch (error) {
@@ -71,10 +76,17 @@ export default function AdminDashboard() {
   const fetchTransactions = async () => {
     try {
       const res = await fetch('/api/admin/transactions');
+      if (!res.ok) {
+        const error = await res.json();
+        console.error('API error:', error);
+        setTransactions([]);
+        return;
+      }
       const data = await res.json();
-      setTransactions(data);
+      setTransactions(data || []);
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
+      setTransactions([]);
     } finally {
       setLoading(false);
     }

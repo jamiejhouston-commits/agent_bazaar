@@ -47,19 +47,28 @@ export default function MyAgentsPage() {
   const fetchTransactions = async () => {
     try {
       const response = await fetch(`/api/transactions?user_id=${user?.id}`);
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('API error:', error);
+        setTransactions([]);
+        setStats({ totalSpent: 0, totalExecutions: 0, uniqueAgents: 0 });
+        return;
+      }
       const data = await response.json();
-      setTransactions(data);
+      setTransactions(data || []);
 
-      const totalSpent = data.reduce((sum: number, t: Transaction) => sum + t.amount, 0);
-      const uniqueAgents = new Set(data.map((t: Transaction) => t.agent_id)).size;
+      const totalSpent = Array.isArray(data) ? data.reduce((sum: number, t: Transaction) => sum + t.amount, 0) : 0;
+      const uniqueAgents = Array.isArray(data) ? new Set(data.map((t: Transaction) => t.agent_id)).size : 0;
 
       setStats({
         totalSpent,
-        totalExecutions: data.length,
+        totalExecutions: Array.isArray(data) ? data.length : 0,
         uniqueAgents,
       });
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
+      setTransactions([]);
+      setStats({ totalSpent: 0, totalExecutions: 0, uniqueAgents: 0 });
     } finally {
       setLoading(false);
     }
