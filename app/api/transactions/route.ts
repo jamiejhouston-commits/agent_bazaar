@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
       .from('transactions')
       .insert({
         id: transactionId,
-        agent_id,
-        buyer_id: user_id,
+        to_agent_id: agent_id,
+        from_user_id: user_id,
         amount,
         currency: 'USDC',
         status: 'completed',
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       .from('transactions')
       .select(`
         *,
-        agents:agent_id (
+        agents:to_agent_id (
           id,
           name,
           avatar_url
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (userId) {
-      query = query.eq('buyer_id', userId);
+      query = query.eq('from_user_id', userId);
     }
 
     const { data, error } = await query;
