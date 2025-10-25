@@ -7,16 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  CheckCircle2,
-  ExternalLink,
-  Download,
-  Image as ImageIcon,
-  FileJson,
-  Link as LinkIcon,
-  Coins,
-  BarChart3
-} from 'lucide-react';
+import { CircleCheck as CheckCircle2, ExternalLink, Download, Image as ImageIcon, FileJson, Link as LinkIcon, Coins, ChartBar as BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Transaction {
@@ -443,4 +434,9 @@ export default function TransactionDetailPage() {
       </div>
     </div>
   );
+}
+
+      )
+    }
+  }
 }
