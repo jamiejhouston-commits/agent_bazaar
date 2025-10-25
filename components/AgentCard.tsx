@@ -12,8 +12,9 @@ interface AgentCardProps {
 
 export function AgentCard({ agent }: AgentCardProps) {
   const isOnline = agent.status === 'online';
-  const displayCapabilities = agent.capabilities.slice(0, 3);
-  const remainingCount = agent.capabilities.length - 3;
+  const capabilities = Array.isArray(agent.capabilities) ? agent.capabilities : [];
+  const displayCapabilities = capabilities.slice(0, 3);
+  const remainingCount = capabilities.length - 3;
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {

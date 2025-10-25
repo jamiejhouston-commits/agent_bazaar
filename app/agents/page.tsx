@@ -53,12 +53,16 @@ export default function AgentsPage() {
 
     if (searchQuery) {
       filtered = filtered.filter(
-        (agent) =>
-          agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          agent.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          agent.capabilities.some((cap) =>
-            cap.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+        (agent) => {
+          const capabilities = Array.isArray(agent.capabilities) ? agent.capabilities : [];
+          return (
+            agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            agent.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            capabilities.some((cap) =>
+              cap.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+          );
+        }
       );
     }
 

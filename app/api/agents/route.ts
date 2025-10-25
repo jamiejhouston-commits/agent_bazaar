@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const category = searchParams.get('category');
     const search = searchParams.get('search');
 
-    let query = supabase.from('agents').select('*').eq('status', 'online');
+    let query = supabase.from('agents').select('*');
 
     if (category) {
       query = query.eq('category', category);
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(data || []);
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },

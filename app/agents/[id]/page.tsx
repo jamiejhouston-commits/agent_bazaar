@@ -126,7 +126,7 @@ export default function AgentDetailPage() {
                 <CardContent className="pt-6">
                   <h3 className="font-semibold text-lg mb-4">Capabilities</h3>
                   <div className="flex flex-wrap gap-2">
-                    {agent.capabilities.map((capability) => (
+                    {(Array.isArray(agent.capabilities) ? agent.capabilities : []).map((capability) => (
                       <Badge key={capability} variant="secondary">
                         {capability}
                       </Badge>
