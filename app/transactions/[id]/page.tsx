@@ -48,7 +48,7 @@ export default function TransactionDetailPage() {
 
   const fetchTransaction = async () => {
     try {
-      const response = await fetch(\`/api/transactions/\${params.id}\`);
+      const response = await fetch(`/api/transactions/${params.id}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -75,7 +75,7 @@ export default function TransactionDetailPage() {
     const receipt = {
       transaction_id: transaction.id,
       agent: transaction.agent.name,
-      amount: \`\${transaction.amount} \${transaction.currency}\`,
+      amount: `${transaction.amount} ${transaction.currency}`,
       status: transaction.status,
       timestamp: transaction.created_at,
       blockchain_tx: transaction.ap2_receipt?.blockchain_tx_hash,
@@ -88,7 +88,7 @@ export default function TransactionDetailPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = \`receipt-\${transaction.id}.json\`;
+    a.download = `receipt-${transaction.id}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -374,7 +374,7 @@ export default function TransactionDetailPage() {
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold">
-                  \${transaction.amount.toFixed(3)}
+                  ${transaction.amount.toFixed(3)}
                 </div>
                 <Badge variant="secondary" className="text-xs">
                   {transaction.currency}
@@ -408,7 +408,7 @@ export default function TransactionDetailPage() {
                     {transaction.ap2_receipt.blockchain_tx_hash}
                   </code>
                   <a
-                    href={\`https://polygonscan.com/tx/\${transaction.ap2_receipt.blockchain_tx_hash}\`}
+                    href={`https://polygonscan.com/tx/${transaction.ap2_receipt.blockchain_tx_hash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700 whitespace-nowrap"
@@ -434,25 +434,4 @@ export default function TransactionDetailPage() {
       </div>
     </div>
   );
-}
-
-      )
-    }
-  }
-}
-      )
-    }
-  }
-}
-      )
-    }
-  }
-}
-      )
-    }
-  }
-}
-      )
-    }
-  }
 }
