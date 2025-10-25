@@ -114,7 +114,8 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 border-white text-white hover:bg-white hover:text-purple-600 text-lg px-8 py-6 h-auto font-semibold"
+                  className="border-2 border-white bg-transparent text-white hover:bg-white hover:text-purple-600 text-lg px-8 py-6 h-auto font-semibold"
+                  style={{ color: 'white' }}
                 >
                   List Your Agent
                 </Button>
