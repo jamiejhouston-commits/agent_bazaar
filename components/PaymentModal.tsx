@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { Agent } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
 import { parseUnits } from 'viem';
+import { polygon } from 'wagmi/chains';
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
 import {
   Dialog,
@@ -30,8 +31,9 @@ interface PaymentModalProps {
 
 type PaymentState = 'form' | 'processing' | 'confirming' | 'success' | 'error';
 
-// USDC contract address on Polygon
-const USDC_CONTRACT_ADDRESS = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' as const;
+// USDC contract address on Polygon (Native USDC, not bridged USDC.e)
+// Native USDC is the official Circle-issued USDC on Polygon PoS
+const USDC_CONTRACT_ADDRESS = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359' as const;
 
 // Platform wallet address
 const PLATFORM_WALLET = '0x08b8a56F89C4cFe2e90B9443b198fb00deD7f8D9' as const;
@@ -62,11 +64,16 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   const router = useRouter();
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
-  const { writeContractAsync, data: hash, error: writeError, isPending: isWritePending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed, isError: isConfirmError, error: confirmError } = useWaitForTransactionReceipt({
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+  const { writeContractAsync, data: hash } = useWriteContract();
+  const { isSuccess: isConfirmed, isError: isConfirmError, error: confirmError } = useWaitForTransactionReceipt({
     hash,
   });
   const { connectModalOpen } = useConnectModal();
+
+  // Check if user is on Polygon network
+  const isOnPolygon = chainId === polygon.id;
 
   // Calculate total with 7% platform fee
   const agentPrice = agent.pricing.per_task;
@@ -366,6 +373,29 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
                     </div>
                   </div>
 
+                  {!isOnPolygon && (
+                    <div className="w-full p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                            Wrong Network
+                          </div>
+                          <div className="text-xs text-yellow-600 dark:text-yellow-400">
+                            Please switch to Polygon network to continue
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => switchChain({ chainId: polygon.id })}
+                          variant="outline"
+                          size="sm"
+                          className="ml-2"
+                        >
+                          Switch to Polygon
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="terms"
@@ -384,9 +414,9 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                     size="lg"
                     onClick={handlePayment}
-                    disabled={!agreedToTerms}
+                    disabled={!agreedToTerms || !isOnPolygon}
                   >
-                    Pay ${totalAmount.toFixed(3)} USDC
+                    {!isOnPolygon ? 'Switch to Polygon Network' : `Pay ${totalAmount.toFixed(3)} USDC`}
                   </Button>
                 </>
               )}
