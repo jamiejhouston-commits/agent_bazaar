@@ -299,7 +299,12 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
                   <div className="flex justify-center">
                     {openConnectModal && (
                       <Button
-                        onClick={openConnectModal}
+                        onClick={() => {
+                          console.log('CONNECT WALLET BUTTON CLICKED!');
+                          console.log('openConnectModal exists:', !!openConnectModal);
+                          openConnectModal();
+                          console.log('openConnectModal() called');
+                        }}
                         className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                         size="lg"
                       >
