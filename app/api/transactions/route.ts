@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+/**
+ * IMPORTANT: This route requires RLS policy update
+ *
+ * Run this SQL in Supabase dashboard:
+ *
+ * CREATE POLICY "Anonymous users can create transactions"
+ *   ON transactions FOR INSERT
+ *   TO anon
+ *   WITH CHECK (true);
+ *
+ * This allows the API to record blockchain-verified transactions.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -13,19 +25,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
+    // Let Supabase generate UUID automatically - don't pass id
     const { data, error } = await supabase
       .from('transactions')
       .insert({
-        id: transactionId,
         to_agent_id: agent_id,
         from_user_id: user_id,
         amount,
         currency: 'USDC',
         status: 'completed',
         ap2_receipt: {
-          transaction_id: transactionId,
           timestamp: new Date().toISOString(),
           protocol: 'AP2',
           settlement: 'instant',
@@ -37,9 +46,21 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Transaction creation error:', error);
+      console.error('Transaction creation error - FULL DETAILS:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        fullError: error,
+      });
       return NextResponse.json(
-        { error: 'Failed to create transaction' },
+        {
+          error: 'Failed to create transaction',
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        },
         { status: 500 }
       );
     }

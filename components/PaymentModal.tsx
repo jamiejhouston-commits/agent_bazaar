@@ -168,6 +168,8 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
 
       const data = await response.json();
 
+      console.log('Transaction API response:', { response, data });
+
       if (response.ok && data.transaction) {
         setTransactionId(data.transaction.id);
 
@@ -216,10 +218,11 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
           router.push(`/transactions/${data.transaction.id}`);
         }, 2000);
       } else {
+        console.error('Database error details:', data);
         setState('error');
         toast({
           title: 'Database error',
-          description: data.error || 'Failed to record transaction',
+          description: data.message || data.error || 'Failed to record transaction',
           variant: 'destructive',
         });
       }
