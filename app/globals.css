@@ -80,3 +80,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Ensure RainbowKit modals appear above everything */
+div[data-rk] {
+  z-index: 9999 !important;
+}
