@@ -85,3 +85,18 @@
 div[data-rk] {
   z-index: 9999 !important;
 }
+
+/* Ensure RainbowKit modal and its content are interactive */
+div[data-rk] * {
+  pointer-events: auto !important;
+}
+
+/* Make dialog backdrop non-blocking for RainbowKit */
+[data-radix-dialog-overlay] {
+  pointer-events: none !important;
+}
+
+/* But keep dialog content interactive */
+[data-radix-dialog-content] {
+  pointer-events: auto !important;
+}

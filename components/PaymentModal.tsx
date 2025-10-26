@@ -282,56 +282,35 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
               </div>
 
               {!isConnected ? (
-                <div className="w-full">
-                  <ConnectButton.Custom>
-                    {({ openConnectModal, connectModalOpen }) => {
-                      // Debug logging
-                      if (typeof window !== 'undefined') {
-                        console.log('Connect modal open:', connectModalOpen);
-                        console.log('MetaMask available:', typeof window.ethereum !== 'undefined');
-                      }
-
-                      return (
-                        <Button
-                          onClick={() => {
-                            console.log('Connect button clicked');
-                            if (openConnectModal) {
-                              openConnectModal();
-                            }
-                          }}
-                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                          size="lg"
-                        >
-                          Connect Wallet
-                        </Button>
-                      );
-                    }}
-                  </ConnectButton.Custom>
+                <div className="w-full flex flex-col gap-4">
+                  <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                    Connect your wallet to continue with payment
+                  </div>
+                  <div className="flex justify-center">
+                    <ConnectButton
+                      label="Connect Wallet"
+                      showBalance={false}
+                      accountStatus="address"
+                    />
+                  </div>
                 </div>
               ) : (
                 <>
-                  <ConnectButton.Custom>
-                    {({ account, chain, openAccountModal, openChainModal, mounted }) => {
-                      return (
-                        <div className="w-full p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800 mb-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Connected Wallet</div>
-                              <div className="font-medium">{account?.displayName}</div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">{account?.displayBalance}</div>
-                            </div>
-                            <Button
-                              onClick={openAccountModal}
-                              variant="outline"
-                              size="sm"
-                            >
-                              Switch Wallet
-                            </Button>
-                          </div>
+                  <div className="w-full p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Connected Wallet</div>
+                        <div className="text-sm">
+                          {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''}
                         </div>
-                      );
-                    }}
-                  </ConnectButton.Custom>
+                      </div>
+                      <ConnectButton
+                        showBalance={true}
+                        accountStatus="address"
+                        chainStatus="icon"
+                      />
+                    </div>
+                  </div>
 
                   <div className="flex items-center space-x-2">
                     <Checkbox

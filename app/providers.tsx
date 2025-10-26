@@ -18,8 +18,10 @@ export function Providers({ children }: { children: ReactNode }) {
           modalSize="compact"
           appInfo={{
             appName: 'Agent Bazaar',
+            learnMoreUrl: 'https://agent-bazaar.vercel.app',
           }}
           initialChain={polygon}
+          showRecentTransactions={false}
         >
           {children}
         </RainbowKitProvider>
