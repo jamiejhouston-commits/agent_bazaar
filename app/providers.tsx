@@ -24,7 +24,12 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider modalSize="compact">
+        <RainbowKitProvider
+          modalSize="compact"
+          appInfo={{
+            appName: 'Agent Bazaar',
+          }}
+        >
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>

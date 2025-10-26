@@ -86,17 +86,8 @@ div[data-rk] {
   z-index: 9999 !important;
 }
 
-/* Fix pointer-events being blocked on body when modals open */
-body {
+/* Allow interactions with RainbowKit wallet buttons */
+button[data-testid*="rk"] {
   pointer-events: auto !important;
-}
-
-/* Ensure RainbowKit modal content is clickable */
-div[data-rk] * {
-  pointer-events: auto !important;
-}
-
-/* Ensure dialog content is clickable */
-[role="dialog"] * {
-  pointer-events: auto !important;
+  cursor: pointer !important;
 }
