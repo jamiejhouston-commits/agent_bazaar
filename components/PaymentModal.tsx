@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
 import {
   Dialog,
   DialogContent,
@@ -66,6 +66,7 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   });
+  const { connectModalOpen } = useConnectModal();
 
   // Calculate total with 7% platform fee
   const agentPrice = agent.pricing.per_task;
@@ -226,8 +227,13 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   }, [isConfirmed, hash, state]);
 
   return (
-    <Dialog open={open} onOpenChange={resetAndClose} modal={false}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={resetAndClose} modal={!connectModalOpen}>
+      <DialogContent
+        className="sm:max-w-md"
+        onPointerDownOutside={(e) => {
+          if (connectModalOpen) e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Payment Required</DialogTitle>
           <DialogDescription>
