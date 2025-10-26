@@ -81,30 +81,7 @@
   }
 }
 
-/* Ensure RainbowKit modals appear above everything and are fully interactive */
+/* Ensure RainbowKit modals appear above everything */
 div[data-rk] {
   z-index: 9999 !important;
-  pointer-events: auto !important;
-}
-
-/* Make all RainbowKit modal content clickable */
-div[data-rk] *,
-div[data-rk] button,
-div[data-rk] a {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
-
-/* Ensure modal overlays don't block RainbowKit */
-div[role="dialog"] {
-  pointer-events: auto !important;
-}
-
-/* Fix for dialog overlays that might block interactions */
-.fixed.inset-0 {
-  pointer-events: none !important;
-}
-
-.fixed.inset-0 > * {
-  pointer-events: auto !important;
 }

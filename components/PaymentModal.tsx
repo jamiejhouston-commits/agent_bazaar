@@ -284,15 +284,28 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
               {!isConnected ? (
                 <div className="w-full">
                   <ConnectButton.Custom>
-                    {({ openConnectModal }) => (
-                      <Button
-                        onClick={openConnectModal}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                        size="lg"
-                      >
-                        Connect Wallet
-                      </Button>
-                    )}
+                    {({ openConnectModal, connectModalOpen }) => {
+                      // Debug logging
+                      if (typeof window !== 'undefined') {
+                        console.log('Connect modal open:', connectModalOpen);
+                        console.log('MetaMask available:', typeof window.ethereum !== 'undefined');
+                      }
+
+                      return (
+                        <Button
+                          onClick={() => {
+                            console.log('Connect button clicked');
+                            if (openConnectModal) {
+                              openConnectModal();
+                            }
+                          }}
+                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                          size="lg"
+                        >
+                          Connect Wallet
+                        </Button>
+                      );
+                    }}
                   </ConnectButton.Custom>
                 </div>
               ) : (
