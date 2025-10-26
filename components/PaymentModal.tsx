@@ -62,7 +62,7 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   const router = useRouter();
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
-  const { writeContract, data: hash } = useWriteContract();
+  const { writeContractAsync, data: hash, error: writeError, isPending: isWritePending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   });
@@ -99,22 +99,45 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
       // Convert amount to USDC (6 decimals)
       const amountInUSDC = parseUnits(totalAmount.toFixed(6), 6);
 
-      // Call USDC contract transfer function
-      writeContract({
+      console.log('[Payment] Initiating USDC transfer:', {
+        from: address,
+        to: PLATFORM_WALLET,
+        amount: totalAmount,
+        amountInUSDC: amountInUSDC.toString(),
+      });
+
+      // Call USDC contract transfer function - this will trigger MetaMask popup
+      const txHash = await writeContractAsync({
         address: USDC_CONTRACT_ADDRESS,
         abi: USDC_ABI,
         functionName: 'transfer',
         args: [PLATFORM_WALLET, amountInUSDC],
       });
 
+      console.log('[Payment] Transaction hash received:', txHash);
+
+      // Transaction submitted successfully, now wait for confirmation
+      setState('confirming');
+
     } catch (error: any) {
-      console.error('Payment initiation error:', error);
+      console.error('[Payment] Transaction error:', error);
       setState('error');
-      toast({
-        title: 'Payment failed',
-        description: error.message || 'Failed to initiate payment',
-        variant: 'destructive',
-      });
+
+      // Handle user rejection specifically
+      if (error?.message?.includes('User rejected') || error?.code === 4001) {
+        toast({
+          title: 'Transaction cancelled',
+          description: 'You rejected the transaction in your wallet',
+          variant: 'default',
+        });
+        setState('form');
+      } else {
+        toast({
+          title: 'Payment failed',
+          description: error.shortMessage || error.message || 'Failed to initiate payment',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
@@ -212,19 +235,13 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
     onOpenChange(false);
   };
 
-  // Watch for transaction confirmation
-  useEffect(() => {
-    if (isConfirming && state !== 'confirming') {
-      setState('confirming');
-    }
-  }, [isConfirming, state]);
-
   // Handle successful blockchain confirmation
   useEffect(() => {
-    if (isConfirmed && hash && state === 'confirming') {
+    if (isConfirmed && hash) {
+      console.log('[Payment] Transaction confirmed on blockchain:', hash);
       handleBlockchainSuccess(hash);
     }
-  }, [isConfirmed, hash, state]);
+  }, [isConfirmed, hash]);
 
   return (
     <Dialog open={open} onOpenChange={resetAndClose} modal={!connectModalOpen}>
