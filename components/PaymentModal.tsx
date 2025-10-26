@@ -63,7 +63,7 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
   const { writeContractAsync, data: hash, error: writeError, isPending: isWritePending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed, isError: isConfirmError, error: confirmError } = useWaitForTransactionReceipt({
     hash,
   });
   const { connectModalOpen } = useConnectModal();
@@ -243,6 +243,36 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
     }
   }, [isConfirmed, hash]);
 
+  // Handle transaction confirmation errors
+  useEffect(() => {
+    if (isConfirmError && confirmError) {
+      console.error('[Payment] Transaction confirmation failed:', confirmError);
+      setState('error');
+      toast({
+        title: 'Transaction failed',
+        description: 'The transaction failed to confirm on the blockchain',
+        variant: 'destructive',
+      });
+    }
+  }, [isConfirmError, confirmError]);
+
+  // Add timeout for stuck transactions (2 minutes)
+  useEffect(() => {
+    if (state === 'confirming') {
+      const timeout = setTimeout(() => {
+        console.error('[Payment] Transaction confirmation timeout');
+        setState('error');
+        toast({
+          title: 'Transaction timeout',
+          description: 'Transaction is taking too long. Please check Polygonscan manually.',
+          variant: 'destructive',
+        });
+      }, 120000); // 2 minutes
+
+      return () => clearTimeout(timeout);
+    }
+  }, [state]);
+
   return (
     <Dialog open={open} onOpenChange={resetAndClose} modal={false}>
       <DialogContent
@@ -378,9 +408,20 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
           <div className="py-12 text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-purple-600 mb-4" />
             <h3 className="text-lg font-semibold mb-2">Confirming on Blockchain</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Waiting for transaction confirmation...
             </p>
+            {hash && (
+              <a
+                href={`https://polygonscan.com/tx/${hash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700"
+              >
+                View on Polygonscan
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
           </div>
         )}
 
