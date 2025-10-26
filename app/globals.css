@@ -84,6 +84,7 @@
 /* Ensure RainbowKit modals appear above everything and are fully clickable */
 div[data-rk] {
   z-index: 99999 !important;
+  pointer-events: auto !important;
 }
 
 /* Critical fix for RainbowKit modal inside Radix Dialog */
@@ -97,4 +98,32 @@ div[data-rk] {
 [aria-labelledby="rk_connect_title"] *,
 [aria-labelledby="rk_account_title"] * {
   pointer-events: auto !important;
+}
+
+/* CRITICAL: Force all buttons and interactive elements inside RainbowKit to be clickable */
+[aria-labelledby="rk_connect_title"] button,
+[aria-labelledby="rk_account_title"] button,
+[data-rk] button,
+div[data-rk] button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Force wallet option buttons to be clickable */
+button[data-testid*="rk"],
+[role="menuitem"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* NUCLEAR OPTION: When RainbowKit modal is open, ensure body doesn't block pointer events */
+body:has([aria-labelledby="rk_connect_title"]),
+body:has([aria-labelledby="rk_account_title"]) {
+  pointer-events: auto !important;
+}
+
+/* Ensure the overlay/backdrop doesn't block clicks */
+[data-rk] ~ div,
+[aria-labelledby="rk_connect_title"] ~ div {
+  pointer-events: none !important;
 }
