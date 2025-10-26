@@ -244,7 +244,7 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   }, [isConfirmed, hash]);
 
   return (
-    <Dialog open={open} onOpenChange={resetAndClose} modal={!connectModalOpen}>
+    <Dialog open={open} onOpenChange={resetAndClose} modal={false}>
       <DialogContent
         className="sm:max-w-md"
         onPointerDownOutside={(e) => {
