@@ -91,6 +91,12 @@ body {
   pointer-events: auto !important;
 }
 
-body * {
+/* Ensure RainbowKit modal content is clickable */
+div[data-rk] * {
+  pointer-events: auto !important;
+}
+
+/* Ensure dialog content is clickable */
+[role="dialog"] * {
   pointer-events: auto !important;
 }
