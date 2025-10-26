@@ -297,6 +297,29 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
                 </div>
               ) : (
                 <>
+                  <ConnectButton.Custom>
+                    {({ account, chain, openAccountModal, openChainModal, mounted }) => {
+                      return (
+                        <div className="w-full p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800 mb-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Connected Wallet</div>
+                              <div className="font-medium">{account?.displayName}</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">{account?.displayBalance}</div>
+                            </div>
+                            <Button
+                              onClick={openAccountModal}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Switch Wallet
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    }}
+                  </ConnectButton.Custom>
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="terms"

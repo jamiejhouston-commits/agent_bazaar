@@ -28,7 +28,9 @@ export function Providers({ children }: { children: ReactNode }) {
           modalSize="compact"
           appInfo={{
             appName: 'Agent Bazaar',
+            disclaimer: 'Please make sure you are connected to Polygon network',
           }}
+          initialChain={polygon}
         >
           {children}
         </RainbowKitProvider>
