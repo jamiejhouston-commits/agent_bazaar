@@ -81,22 +81,20 @@
   }
 }
 
-/* Ensure RainbowKit modals appear above everything */
+/* Ensure RainbowKit modals appear above everything and are fully clickable */
 div[data-rk] {
-  z-index: 9999 !important;
+  z-index: 99999 !important;
 }
 
-/* Ensure RainbowKit modal and its content are interactive */
-div[data-rk] * {
+/* Critical fix for RainbowKit modal inside Radix Dialog */
+/* Ensures the connect modal is always clickable even when inside another dialog */
+[aria-labelledby="rk_connect_title"],
+[aria-labelledby="rk_account_title"] {
   pointer-events: auto !important;
 }
 
-/* Make dialog backdrop non-blocking for RainbowKit */
-[data-radix-dialog-overlay] {
-  pointer-events: none !important;
-}
-
-/* But keep dialog content interactive */
-[data-radix-dialog-content] {
+/* Make all elements inside RainbowKit modals interactive */
+[aria-labelledby="rk_connect_title"] *,
+[aria-labelledby="rk_account_title"] * {
   pointer-events: auto !important;
 }

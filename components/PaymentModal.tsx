@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useConnectModal, useAccountModal } from '@rainbow-me/rainbowkit';
 import {
   Dialog,
   DialogContent,
@@ -66,6 +66,8 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   });
+  const { openConnectModal, connectModalOpen } = useConnectModal();
+  const { openAccountModal } = useAccountModal();
 
   // Calculate total with 7% platform fee
   const agentPrice = agent.pricing.per_task;
@@ -227,7 +229,15 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
 
   return (
     <Dialog open={open} onOpenChange={resetAndClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onPointerDownOutside={(e) => {
+          // Prevent dialog from closing when clicking on RainbowKit modal
+          if (connectModalOpen) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Payment Required</DialogTitle>
           <DialogDescription>
@@ -287,11 +297,15 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
                     Connect your wallet to continue with payment
                   </div>
                   <div className="flex justify-center">
-                    <ConnectButton
-                      label="Connect Wallet"
-                      showBalance={false}
-                      accountStatus="address"
-                    />
+                    {openConnectModal && (
+                      <Button
+                        onClick={openConnectModal}
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        size="lg"
+                      >
+                        Connect Wallet
+                      </Button>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -300,15 +314,19 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Connected Wallet</div>
-                        <div className="text-sm">
+                        <div className="text-sm font-medium">
                           {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''}
                         </div>
                       </div>
-                      <ConnectButton
-                        showBalance={true}
-                        accountStatus="address"
-                        chainStatus="icon"
-                      />
+                      {openAccountModal && (
+                        <Button
+                          onClick={openAccountModal}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Manage Wallet
+                        </Button>
+                      )}
                     </div>
                   </div>
 
