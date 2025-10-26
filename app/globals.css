@@ -127,3 +127,30 @@ body:has([aria-labelledby="rk_account_title"]) {
 [aria-labelledby="rk_connect_title"] ~ div {
   pointer-events: none !important;
 }
+
+/* Override Radix Dialog's pointer-events blocking */
+[data-radix-dialog-overlay],
+[data-radix-portal] {
+  pointer-events: none !important;
+}
+
+/* But allow pointer events on the actual dialog content */
+[role="dialog"] {
+  pointer-events: auto !important;
+}
+
+/* Target wallet buttons by their visual structure */
+[aria-labelledby="rk_connect_title"] > div > div > button,
+[aria-labelledby="rk_connect_title"] button[type="button"],
+[aria-labelledby="rk_connect_title"] [role="button"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  touch-action: auto !important;
+  user-select: auto !important;
+}
+
+/* Force clicks to register on wallet list items */
+[aria-labelledby="rk_connect_title"] [data-testid],
+[aria-labelledby="rk_connect_title"] div[role="button"] {
+  pointer-events: auto !important;
+}
