@@ -85,3 +85,12 @@
 div[data-rk] {
   z-index: 9999 !important;
 }
+
+/* Fix pointer-events being blocked on body when modals open */
+body {
+  pointer-events: auto !important;
+}
+
+body * {
+  pointer-events: auto !important;
+}
