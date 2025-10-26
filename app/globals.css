@@ -129,13 +129,21 @@ body:has([aria-labelledby="rk_account_title"]) {
 }
 
 /* Override Radix Dialog's pointer-events blocking */
-[data-radix-dialog-overlay],
-[data-radix-portal] {
+[data-radix-dialog-overlay] {
   pointer-events: none !important;
 }
 
 /* But allow pointer events on the actual dialog content */
 [role="dialog"] {
+  pointer-events: auto !important;
+}
+
+/* CRITICAL: Ensure all interactive elements in dialogs work */
+[role="dialog"] input,
+[role="dialog"] button,
+[role="dialog"] label,
+[role="dialog"] [role="checkbox"],
+[role="dialog"] * {
   pointer-events: auto !important;
 }
 

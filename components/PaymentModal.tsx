@@ -248,7 +248,14 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
       <DialogContent
         className="sm:max-w-md"
         onPointerDownOutside={(e) => {
-          if (connectModalOpen) e.preventDefault();
+          // Prevent closing when clicking wallet modal or inside dialog
+          if (connectModalOpen || e.target instanceof Element && e.target.closest('[role="dialog"]')) {
+            e.preventDefault();
+          }
+        }}
+        onInteractOutside={(e) => {
+          // Prevent any interaction outside from closing the dialog
+          e.preventDefault();
         }}
       >
         <DialogHeader>
