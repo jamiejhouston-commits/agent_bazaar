@@ -10,7 +10,6 @@ export const wagmiConfig = getDefaultConfig({
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '',
   chains: [polygon],
   transports: {
-    // Using public Polygon RPC - for production, use Alchemy or Infura
     [polygon.id]: http('https://polygon-rpc.com'),
   },
   ssr: true,
