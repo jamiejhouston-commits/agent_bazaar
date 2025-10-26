@@ -37,7 +37,8 @@ export const wagmiConfig = createConfig({
   connectors,
   chains: [polygon],
   transports: {
-    [polygon.id]: http(),
+    // Using public Polygon RPC - for production, use Alchemy or Infura
+    [polygon.id]: http('https://polygon-rpc.com'),
   },
   ssr: true,
 });
