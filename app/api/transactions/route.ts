@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
-/**
- * IMPORTANT: This route requires RLS policy update
- *
- * Run this SQL in Supabase dashboard:
- *
- * CREATE POLICY "Anonymous users can create transactions"
- *   ON transactions FOR INSERT
- *   TO anon
- *   WITH CHECK (true);
- *
- * This allows the API to record blockchain-verified transactions.
- */
+// Use service role key to bypass RLS policies for API routes
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  }
+);
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Let Supabase generate UUID automatically - don't pass id
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('transactions')
       .insert({
         to_agent_id: agent_id,
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('transactions')
       .select(`
         *,
