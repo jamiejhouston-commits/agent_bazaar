@@ -1,4 +1,3 @@
-import Replicate from 'replicate';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -13,15 +12,6 @@ const supabaseAdmin = createClient(
     },
   }
 );
-
-const getReplicateClient = () => {
-  if (!process.env.REPLICATE_API_TOKEN) {
-    return null;
-  }
-  return new Replicate({
-    auth: process.env.REPLICATE_API_TOKEN,
-  });
-};
 
 export async function POST(request: NextRequest) {
   let transaction_id: string | undefined;
@@ -51,54 +41,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    // Check Replicate API token
-    const replicate = getReplicateClient();
-    if (!replicate) {
-      const errorMsg = 'Replicate API token not configured';
-      console.error('[Neural Artist] Configuration error:', errorMsg);
+    console.log('[Neural Artist] Generating image with Pollinations.ai...');
 
-      if (transaction_id) {
-        await supabaseAdmin
-          .from('transactions')
-          .update({
-            status: 'failed',
-            error_message: errorMsg,
-          })
-          .eq('id', transaction_id);
-      }
+    // FREE image generation using Pollinations.ai
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt.trim())}?width=1024&height=1024&nologo=true`;
 
-      return NextResponse.json({
-        error: errorMsg,
-        details: 'Please set REPLICATE_API_TOKEN environment variable'
-      }, { status: 500 });
-    }
-
-    console.log('[Neural Artist] Running SDXL model on Replicate...');
-
-    // Run SDXL model on Replicate
-    const output = await replicate.run(
-      "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
-      {
-        input: {
-          prompt: prompt.trim(),
-          negative_prompt: "ugly, blurry, low quality, distorted, deformed",
-          width: 1024,
-          height: 1024,
-          num_outputs: 1,
-          num_inference_steps: 25,
-          guidance_scale: 7.5,
-        }
-      }
-    );
-
-    const imageUrl = Array.isArray(output) ? output[0] : output;
-    console.log('[Neural Artist] Image generated successfully:', imageUrl);
+    console.log('[Neural Artist] Image URL generated:', imageUrl);
 
     const outputData = {
       success: true,
       image_url: imageUrl,
       prompt: prompt.trim(),
-      model: 'Stable Diffusion XL',
+      model: 'Pollinations.ai',
       timestamp: new Date().toISOString(),
     };
 
@@ -125,7 +79,7 @@ export async function POST(request: NextRequest) {
     console.error('[Neural Artist] Execution error:', error);
     const errorMsg = error.message || 'Failed to generate image';
 
-    // Update transaction with error using transaction_id from line 29 (already in scope)
+    // Update transaction with error
     if (transaction_id) {
       try {
         await supabaseAdmin
