@@ -302,7 +302,7 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   return (
     <Dialog open={open} onOpenChange={resetAndClose} modal={false}>
       <DialogContent
-        className="sm:max-w-md"
+        className="sm:max-w-md max-h-[90vh] overflow-y-auto"
         onPointerDownOutside={(e) => {
           // Prevent closing when clicking wallet modal or inside dialog
           if (connectModalOpen || e.target instanceof Element && e.target.closest('[role="dialog"]')) {
@@ -417,20 +417,20 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
 
                   {/* Neural Artist Pro - Custom Prompt Input */}
                   {(agent.name === 'Neural Artist Pro' || agent.name.toLowerCase().includes('neural') || agent.name.toLowerCase().includes('artist')) && (
-                    <div className="w-full mb-4">
-                      <label htmlFor="prompt-input" className="block text-sm font-medium mb-2">
+                    <div className="w-full mb-3">
+                      <label htmlFor="prompt-input" className="block text-sm font-medium mb-1">
                         Image Prompt
                       </label>
                       <input
                         id="prompt-input"
                         type="text"
-                        placeholder="Describe the image you want to generate..."
+                        placeholder="Describe the image you want..."
                         value={promptInput}
                         onChange={(e) => setPromptInput(e.target.value)}
-                        className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-950 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-950 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Example: "a cyberpunk city at sunset with flying cars"
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        e.g., "cyberpunk city at sunset"
                       </p>
                     </div>
                   )}
