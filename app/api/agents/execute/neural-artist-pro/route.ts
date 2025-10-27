@@ -24,9 +24,12 @@ const getReplicateClient = () => {
 };
 
 export async function POST(request: NextRequest) {
+  let transaction_id: string | undefined;
+
   try {
     const body = await request.json();
-    const { prompt, transaction_id } = body;
+    const { prompt, transaction_id: txId } = body;
+    transaction_id = txId;
 
     console.log('[Neural Artist] Starting execution:', { prompt, transaction_id });
 
@@ -122,21 +125,19 @@ export async function POST(request: NextRequest) {
     console.error('[Neural Artist] Execution error:', error);
     const errorMsg = error.message || 'Failed to generate image';
 
-    // Update transaction with error
-    if (request.body) {
+    // Update transaction with error using transaction_id from line 29 (already in scope)
+    if (transaction_id) {
       try {
-        const body = await request.json();
-        if (body.transaction_id) {
-          await supabaseAdmin
-            .from('transactions')
-            .update({
-              status: 'failed',
-              error_message: errorMsg,
-            })
-            .eq('id', body.transaction_id);
-        }
-      } catch (e) {
-        // Body already read, skip
+        await supabaseAdmin
+          .from('transactions')
+          .update({
+            status: 'failed',
+            error_message: errorMsg,
+          })
+          .eq('id', transaction_id);
+        console.log('[Neural Artist] Transaction marked as failed');
+      } catch (dbError) {
+        console.error('[Neural Artist] Failed to update transaction:', dbError);
       }
     }
 
