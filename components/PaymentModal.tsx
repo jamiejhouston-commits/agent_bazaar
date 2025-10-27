@@ -60,6 +60,7 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [blockchainTxHash, setBlockchainTxHash] = useState('');
+  const [promptInput, setPromptInput] = useState('');
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -176,20 +177,35 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
         // Trigger agent execution after successful payment
         try {
           const agentSlug = agent.name.toLowerCase().replace(/\s+/g, '-');
-          const executeResponse = await fetch(`/api/agents/execute/${agentSlug}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              transaction_id: data.transaction.id,
+
+          // Prepare agent-specific input data
+          let agentInputData: any = {
+            transaction_id: data.transaction.id,
+          };
+
+          // Neural Artist - Use custom prompt or default
+          if (agentSlug.includes('neural') || agentSlug.includes('artist')) {
+            agentInputData.prompt = promptInput.trim() || 'a beautiful landscape with mountains and sunset, digital art, highly detailed';
+          }
+          // Other agents - use placeholder data
+          else {
+            agentInputData = {
+              ...agentInputData,
               prompt: 'a beautiful sunset over mountains',
               nft_name: 'My NFT',
               collection_type: 'Digital Art',
               file_url: 'https://via.placeholder.com/500',
               metadata_uri: 'ipfs://example',
               wallet_address: address,
-            }),
+            };
+          }
+
+          const executeResponse = await fetch(`/api/agents/execute/${agentSlug}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(agentInputData),
           });
 
           const executeResult = await executeResponse.json();
@@ -396,6 +412,26 @@ export function PaymentModal({ agent, open, onOpenChange, onSuccess }: PaymentMo
                           Switch to Polygon
                         </Button>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Neural Artist Pro - Custom Prompt Input */}
+                  {(agent.name === 'Neural Artist Pro' || agent.name.toLowerCase().includes('neural') || agent.name.toLowerCase().includes('artist')) && (
+                    <div className="w-full mb-4">
+                      <label htmlFor="prompt-input" className="block text-sm font-medium mb-2">
+                        Image Prompt
+                      </label>
+                      <input
+                        id="prompt-input"
+                        type="text"
+                        placeholder="Describe the image you want to generate..."
+                        value={promptInput}
+                        onChange={(e) => setPromptInput(e.target.value)}
+                        className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-950 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Example: "a cyberpunk city at sunset with flying cars"
+                      </p>
                     </div>
                   )}
 
