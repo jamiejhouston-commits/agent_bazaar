@@ -31,9 +31,9 @@ interface PaymentModalProps {
 
 type PaymentState = 'form' | 'processing' | 'confirming' | 'success' | 'error';
 
-// USDC contract address on Polygon (Bridged USDC.e)
-// Using USDC.e because it's what most users have in their wallets
-const USDC_CONTRACT_ADDRESS = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' as const;
+// USDC contract address on Polygon (Native USDC)
+// Native USDC is the official Circle-issued USDC on Polygon PoS
+const USDC_CONTRACT_ADDRESS = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359' as const;
 
 // Platform wallet address
 const PLATFORM_WALLET = '0x08b8a56F89C4cFe2e90B9443b198fb00deD7f8D9' as const;
