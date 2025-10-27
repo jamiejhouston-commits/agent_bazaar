@@ -14,7 +14,7 @@ import Link from 'next/link';
 
 interface Transaction {
   id: string;
-  agent_id: string;
+  to_agent_id: string;
   amount: number;
   created_at: string;
   status: string;
@@ -58,7 +58,7 @@ export default function MyAgentsPage() {
       setTransactions(data || []);
 
       const totalSpent = Array.isArray(data) ? data.reduce((sum: number, t: Transaction) => sum + t.amount, 0) : 0;
-      const uniqueAgents = Array.isArray(data) ? new Set(data.map((t: Transaction) => t.agent_id)).size : 0;
+      const uniqueAgents = Array.isArray(data) ? new Set(data.map((t: Transaction) => t.to_agent_id)).size : 0;
 
       setStats({
         totalSpent,
@@ -89,7 +89,7 @@ export default function MyAgentsPage() {
 
   const uniqueAgents = Array.from(
     new Map(
-      transactions.map((t) => [t.agent_id, t.agents])
+      transactions.map((t) => [t.to_agent_id, t.agents])
     ).values()
   );
 
@@ -157,7 +157,7 @@ export default function MyAgentsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {uniqueAgents.map((agent) => {
                 const agentTransactions = transactions.filter(
-                  (t) => t.agent_id === agent.id
+                  (t) => t.to_agent_id === agent.id
                 );
                 const totalSpent = agentTransactions.reduce(
                   (sum, t) => sum + t.amount,
